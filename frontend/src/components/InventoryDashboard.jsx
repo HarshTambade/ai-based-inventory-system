@@ -1,97 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Bell, Package, TrendingUp } from 'lucide-react';
-import { fetchDemandPredictions, fetchInventoryAlerts, fetchRecommendations } from '../services/api';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { Alert } from "@/components/ui/alert";
+import { Bell, Package, TrendingUp } from "lucide-react";
+
+// Sample Data for Chart
+const data = [
+  { month: 'Jan', actualSales: 220, predictedSales: 210 },
+  { month: 'Feb', actualSales: 200, predictedSales: 190 },
+  { month: 'Mar', actualSales: 180, predictedSales: 175 },
+  { month: 'Apr', actualSales: 210, predictedSales: 205 },
+];
 
 const InventoryDashboard = () => {
-  const [demandData, setDemandData] = useState([]);
-  const [lowStockProducts, setLowStockProducts] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const demandResponse = await fetchDemandPredictions();
-      const alertsResponse = await fetchInventoryAlerts();
-      const recommendationsResponse = await fetchRecommendations('Customer_57');
-
-      setDemandData(demandResponse.predictions);
-      setLowStockProducts(alertsResponse.alerts);
-      setRecommendations(recommendationsResponse.recommendations);
-    };
-
-    fetchData();
-  }, []);
-
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Demand Prediction Chart */}
-        <Card className="col-span-2">
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-4xl font-bold mb-8">Inventory AI Platform</h1>
+
+      {/* Line Chart for Demand Forecast */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Demand Forecast</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="actualSales" stroke="#8884d8" />
+              <Line type="monotone" dataKey="predictedSales" stroke="#82ca9d" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Stock Alerts Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-4">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Demand Forecast
+            <CardTitle>
+              <Bell className="inline mr-2" /> Stock Alerts
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={demandData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="actual" stroke="#8884d8" name="Actual Sales" />
-                  <Line type="monotone" dataKey="predicted" stroke="#82ca9d" name="Predicted" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <Alert type="danger">
+              Low stock alert: Soap (15/50 units)
+            </Alert>
+            <Alert type="danger">
+              Low stock alert: Perfume (8/30 units)
+            </Alert>
           </CardContent>
         </Card>
 
-        {/* Low Stock Alerts */}
-        <Card>
+        {/* Smart Recommendations */}
+        <Card className="p-4">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Stock Alerts
+            <CardTitle>
+              <Package className="inline mr-2" /> Smart Recommendations
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {lowStockProducts.map((product) => (
-                <Alert key={product.id} variant="destructive">
-                  <AlertDescription>
-                    Low stock alert: {product.id} ({product.current}/{product.threshold} units)
-                  </AlertDescription>
-                </Alert>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Product Recommendations */}
-        <Card className="col-span-1 md:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Smart Recommendations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {recommendations.map((rec) => (
-                <div
-                  key={rec}
-                  className="p-4 border rounded-lg bg-white shadow-sm"
-                >
-                  <h3 className="font-medium">{rec}</h3>
-                </div>
-              ))}
-            </div>
+            <div>Vitamin Supplements</div>
+            <div>Confidence: 89.0%</div>
+            <br />
+            <div>Protein Shake</div>
+            <div>Confidence: 75.0%</div>
           </CardContent>
         </Card>
       </div>
